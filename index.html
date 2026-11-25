@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CardSheet — Freeform Image Placer, Cropper &amp; Sheet Builder</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Crect x='2' y='5' width='11' height='18' rx='2.5' fill='%232563eb'/%3E%3Crect x='15' y='5' width='11' height='18' rx='2.5' fill='none' stroke='%232563eb' stroke-width='2.5'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./styles.css">
+  <script defer src="./app.js"></script>
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <svg class="brand-icon" viewBox="0 0 28 28" width="28" height="28" aria-hidden="true">
+        <rect x="3" y="4" width="13" height="16" rx="2.5" fill="currentColor" opacity="0.9"></rect>
+        <rect x="12" y="9" width="13" height="15" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"></rect>
+      </svg>
+      <div>
+        <h1>CardSheet</h1>
+        <p class="subtitle">Upload, capture, straighten, resize &amp; place images anywhere on the sheet</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button type="button" id="theme-toggle-btn" class="btn btn-ghost" aria-label="Toggle color theme">
+        <span id="theme-label">Theme: Auto</span>
+      </button>
+      <button type="button" id="reset-all-btn" class="btn btn-ghost">Reset All</button>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <!-- Left / Controls Panel -->
+    <aside class="controls-panel" aria-label="Image layers, canvas settings, and export">
+      <!-- 1. Image Layers -->
+      <section class="panel-section" aria-labelledby="layers-heading">
+        <div class="section-header">
+          <h2 id="layers-heading">1. Images &amp; Layers</h2>
+          <button type="button" id="add-layer-btn" class="btn btn-small btn-secondary">
+            + Add Image
+          </button>
+        </div>
+
+        <p class="hint-text">Upload, drag &amp; drop, paste (<kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>V</kbd>), or capture. Then drag images anywhere on the canvas.</p>
+
+        <div class="slots-list" id="layers-list"></div>
+      </section>
+
+      <!-- 2. Canvas Size & Styling -->
+      <section class="panel-section" aria-labelledby="canvas-heading">
+        <h2 id="canvas-heading">2. Canvas &amp; Style</h2>
+
+        <div class="control-group">
+          <label class="group-label" for="canvas-preset">Paper / Canvas Size</label>
+          <select id="canvas-preset" class="select-input">
+            <optgroup label="Print Paper Sizes">
+              <option value="a4">A4 (210 × 297 mm)</option>
+              <option value="a5">A5 (148 × 210 mm)</option>
+              <option value="a3">A3 (297 × 420 mm)</option>
+              <option value="letter">US Letter (8.5 × 11 in)</option>
+              <option value="legal">US Legal (8.5 × 14 in)</option>
+              <option value="photo-4x6">4 × 6 in Photo</option>
+              <option value="photo-5x7">5 × 7 in Photo</option>
+            </optgroup>
+            <optgroup label="Screen &amp; Aspect Ratios">
+              <option value="4:3" selected>4:3 Landscape (1600 × 1200 px)</option>
+              <option value="3:4">3:4 Portrait (1200 × 1600 px)</option>
+              <option value="1:1">1:1 Square (1200 × 1200 px)</option>
+              <option value="16:9">16:9 Widescreen (1920 × 1080 px)</option>
+            </optgroup>
+            <optgroup label="Flexible">
+              <option value="auto">Auto-Fit Around Placed Images</option>
+              <option value="custom">Custom Width × Height (px)</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <div class="paper-options" id="paper-options-wrap" hidden>
+          <div class="align-grid">
+            <div class="control-group">
+              <span class="group-label">Orientation</span>
+              <div class="segmented-control" role="radiogroup" aria-label="Paper orientation">
+                <label class="seg-option">
+                  <input type="radio" name="paperOrientation" value="portrait" checked>
+                  <span>Portrait</span>
+                </label>
+                <label class="seg-option">
+                  <input type="radio" name="paperOrientation" value="landscape">
+                  <span>Landscape</span>
+                </label>
+              </div>
+            </div>
+
+            <label class="field-inline">
+              <span>Print Quality (DPI)</span>
+              <select id="paper-dpi" class="select-input">
+                <option value="300" selected>300 DPI (Print)</option>
+                <option value="150">150 DPI (Medium)</option>
+                <option value="96">96 DPI (Screen)</option>
+              </select>
+            </label>
+          </div>
+          <p class="hint-text" id="paper-physical-info">210 × 297 mm · 2480 × 3508 px</p>
+        </div>
+
+        <div class="dims-input-grid" id="canvas-custom-dims" hidden>
+          <label class="field-inline">
+            <span>Canvas Width (px)</span>
+            <input type="number" id="canvas-width" class="number-input" min="100" max="8000" value="1600">
+          </label>
+          <label class="field-inline">
+            <span>Canvas Height (px)</span>
+            <input type="number" id="canvas-height" class="number-input" min="100" max="8000" value="1200">
+          </label>
+        </div>
+
+        <div class="control-row" id="auto-margin-wrap" hidden>
+          <div class="control-label-row">
+            <label for="auto-margin-range">Auto-Fit Margin</label>
+            <output id="auto-margin-out" for="auto-margin-range">32 px</output>
+          </div>
+          <input type="range" id="auto-margin-range" min="0" max="160" value="32" step="4">
+        </div>
+
+        <div class="control-group">
+          <span class="group-label">Quick Helpers (Optional)</span>
+          <div class="helper-grid">
+            <button type="button" id="helper-trim-btn" class="btn btn-small btn-secondary">✂ Trim Canvas to Images</button>
+            <button type="button" id="helper-center-btn" class="btn btn-small btn-secondary">⌖ Center Selected</button>
+            <button type="button" id="helper-match-btn" class="btn btn-small btn-secondary">⊞ Match Sizes</button>
+            <button type="button" id="helper-id-size-btn" class="btn btn-small btn-secondary" title="Size card to real 85.6 × 54 mm at selected print DPI">🪪 Real ID Size</button>
+            <button type="button" id="helper-side-btn" class="btn btn-small btn-ghost">◫ Place Side by Side</button>
+            <button type="button" id="helper-stack-btn" class="btn btn-small btn-ghost">⬓ Stack Vertical</button>
+          </div>
+        </div>
+
+        <div class="control-row">
+          <div class="control-label-row">
+            <label for="radius-range">Image Corner Radius</label>
+            <output id="radius-out" for="radius-range">12 px</output>
+          </div>
+          <input type="range" id="radius-range" min="0" max="64" value="12" step="1">
+        </div>
+
+        <div class="control-group">
+          <span class="group-label">Background</span>
+          <div class="bg-options">
+            <label class="chip-radio">
+              <input type="radio" name="bgMode" value="white" checked>
+              <span>White</span>
+            </label>
+            <label class="chip-radio">
+              <input type="radio" name="bgMode" value="transparent">
+              <span>Transparent</span>
+            </label>
+            <label class="chip-radio">
+              <input type="radio" name="bgMode" value="dark">
+              <span>Dark</span>
+            </label>
+            <label class="chip-radio">
+              <input type="radio" name="bgMode" value="custom">
+              <span>Custom</span>
+            </label>
+            <input type="color" id="bg-color-picker" value="#f1f5f9" aria-label="Custom background color" hidden>
+          </div>
+        </div>
+
+        <label class="checkbox-row" for="snap-guides">
+          <input type="checkbox" id="snap-guides" checked>
+          <span>Snap &amp; alignment guides while dragging</span>
+        </label>
+
+        <label class="checkbox-row" for="show-labels">
+          <input type="checkbox" id="show-labels">
+          <span>Draw image labels on exported output</span>
+        </label>
+      </section>
+
+      <!-- 3. Output Resize & Export -->
+      <section class="panel-section" aria-labelledby="export-heading">
+        <h2 id="export-heading">3. Export &amp; Output Resize</h2>
+
+        <div class="control-row">
+          <div class="control-label-row">
+            <label for="export-scale-range">Output Scale</label>
+            <output id="export-scale-out" for="export-scale-range">100%</output>
+          </div>
+          <input type="range" id="export-scale-range" min="25" max="200" value="100" step="5">
+        </div>
+
+        <div class="align-grid">
+          <label class="field-inline">
+            <span>Format</span>
+            <select id="export-format" class="select-input">
+              <option value="image/png" selected>PNG</option>
+              <option value="image/jpeg">JPEG</option>
+              <option value="image/webp">WebP</option>
+            </select>
+          </label>
+          <label class="field-inline" id="quality-wrap" hidden>
+            <span>Quality (<output id="quality-out" for="export-quality">92%</output>)</span>
+            <input type="range" id="export-quality" min="20" max="100" value="92" step="2">
+          </label>
+        </div>
+
+        <div class="export-actions">
+          <button type="button" id="download-btn" class="btn btn-primary btn-block" disabled>
+            ⬇ Download Image
+          </button>
+          <div class="export-secondary-row">
+            <button type="button" id="copy-btn" class="btn btn-secondary" disabled>
+              Copy Image
+            </button>
+            <button type="button" id="print-btn" class="btn btn-secondary" disabled>
+              Print / PDF
+            </button>
+          </div>
+        </div>
+      </section>
+    </aside>
+
+    <!-- Right / Freeform Live Canvas -->
+    <section class="preview-panel" aria-label="Interactive freeform canvas">
+      <div class="preview-toolbar">
+        <div class="preview-info">
+          <span class="status-pill" id="output-dims-badge">1600 × 1200 px</span>
+          <span class="preview-tip" id="canvas-tip">Drag any image anywhere to place it. Drag its corners to resize.</span>
+        </div>
+        <div class="preview-zoom-controls">
+          <button type="button" id="quick-front-btn" class="btn btn-small btn-ghost" disabled>↑ Bring Front</button>
+          <button type="button" id="quick-back-btn" class="btn btn-small btn-ghost" disabled>↓ Send Back</button>
+        </div>
+      </div>
+
+      <div class="canvas-stage" id="canvas-stage">
+        <div class="empty-stage" id="empty-stage">
+          <div class="empty-stage-card">
+            <h2>Freeform Image Canvas</h2>
+            <p>Upload or capture your images, straighten or crop any tilted edges, then drag &amp; resize them anywhere you want on the canvas.</p>
+            <div class="empty-stage-actions">
+              <label class="btn btn-primary file-btn">
+                Upload First Image
+                <input type="file" accept="image/*" class="visually-hidden" id="hero-upload-0">
+              </label>
+              <label class="btn btn-secondary file-btn">
+                Upload Second Image
+                <input type="file" accept="image/*" class="visually-hidden" id="hero-upload-1">
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <canvas
+          id="preview-canvas"
+          class="preview-canvas"
+          aria-label="Freeform image placement canvas"
+          hidden
+        ></canvas>
+      </div>
+
+      <p class="sr-live" id="status-live" role="status" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <!-- Camera Capture Modal -->
+  <dialog id="camera-dialog" closedby="any" aria-labelledby="camera-dialog-title">
+    <div class="dialog-shell">
+      <header class="dialog-header">
+        <h1 id="camera-dialog-title">Capture Image</h1>
+        <form method="dialog">
+          <button type="submit" value="close" class="icon-btn" aria-label="Close camera modal">✕</button>
+        </form>
+      </header>
+
+      <div class="dialog-body">
+        <p class="camera-target-label" id="camera-target-label">Target: Image 1</p>
+        <div class="camera-viewport">
+          <video id="camera-video" autoplay playsinline muted></video>
+          <canvas id="camera-snapshot" hidden></canvas>
+          <p class="camera-error" id="camera-error" hidden></p>
+        </div>
+      </div>
+
+      <footer class="dialog-footer">
+        <button type="button" id="camera-flip-btn" class="btn btn-secondary">🔄 Flip Camera</button>
+        <div class="dialog-footer-right">
+          <button type="button" id="camera-retake-btn" class="btn btn-secondary" hidden>Retake</button>
+          <button type="button" id="camera-snap-btn" class="btn btn-primary" autofocus>Take Photo</button>
+          <button type="button" id="camera-use-btn" class="btn btn-primary" hidden>Use Photo</button>
+        </div>
+      </footer>
+    </div>
+  </dialog>
+
+  <!-- Crop & 4-Corner Straighten Modal -->
+  <dialog id="crop-dialog" class="crop-dialog" closedby="any" aria-labelledby="crop-dialog-title">
+    <div class="dialog-shell">
+      <header class="dialog-header">
+        <div>
+          <h1 id="crop-dialog-title">Crop, Straighten &amp; Resize Image</h1>
+          <p class="dialog-subtitle" id="crop-target-label">Image 1</p>
+        </div>
+        <form method="dialog">
+          <button type="submit" value="close" class="icon-btn" aria-label="Close crop modal">✕</button>
+        </form>
+      </header>
+
+      <div class="dialog-body crop-dialog-body">
+        <div class="crop-mode-bar">
+          <div class="segmented-control crop-mode-switch" role="radiogroup" aria-label="Crop mode">
+            <label class="seg-option">
+              <input type="radio" name="cropMode" value="perspective" checked>
+              <span>⏢ 4-Corner Edges (Straighten)</span>
+            </label>
+            <label class="seg-option">
+              <input type="radio" name="cropMode" value="rect">
+              <span>▭ Rectangle Crop</span>
+            </label>
+          </div>
+          <p class="hint-text" id="crop-mode-hint">Drag any corner (TL, TR, BR, BL) or edge point independently to fit skewed/tilted edges.</p>
+        </div>
+
+        <div class="crop-toolbar">
+          <div class="crop-ratios" role="group" aria-label="Crop aspect ratio presets">
+            <button type="button" class="ratio-btn is-active" data-ratio="free">Free</button>
+            <button type="button" class="ratio-btn" data-ratio="3:4">3:4</button>
+            <button type="button" class="ratio-btn" data-ratio="4:3">4:3</button>
+            <button type="button" class="ratio-btn" data-ratio="1:1">1:1</button>
+            <button type="button" class="ratio-btn" data-ratio="2:3">2:3</button>
+            <button type="button" class="ratio-btn" data-ratio="3:2">3:2</button>
+            <button type="button" class="ratio-btn" data-ratio="16:9">16:9</button>
+            <button type="button" class="ratio-btn" data-ratio="9:16">9:16</button>
+            <button type="button" class="ratio-btn" data-ratio="id-card">ID Card</button>
+          </div>
+          <div class="crop-quick-tools">
+            <button type="button" id="crop-flip-ratio-btn" class="btn btn-small btn-ghost" title="Flip aspect ratio">⇄ Flip Ratio</button>
+            <button type="button" id="crop-rot-left-btn" class="icon-btn" aria-label="Rotate left 90 degrees" title="Rotate left">↺</button>
+            <button type="button" id="crop-rot-right-btn" class="icon-btn" aria-label="Rotate right 90 degrees" title="Rotate right">↻</button>
+          </div>
+        </div>
+
+        <div class="crop-stage">
+          <canvas id="crop-canvas" class="crop-canvas" aria-label="Interactive image crop editor"></canvas>
+        </div>
+
+        <section class="crop-resize-panel" aria-label="Resize cropped image">
+          <div class="crop-metrics">
+            <span class="dim-badge" id="crop-selection-dims">Selection: —</span>
+            <span class="status-pill" id="crop-result-dims">Result: —</span>
+          </div>
+
+          <div class="crop-resize-controls">
+            <label class="field-inline">
+              <span>Resize Crop</span>
+              <select id="crop-resize-mode" class="select-input">
+                <option value="none" selected>Keep Cropped Size</option>
+                <option value="scale">Scale Percentage (%)</option>
+                <option value="custom">Custom Width × Height (px)</option>
+              </select>
+            </label>
+
+            <div class="control-row" id="crop-scale-wrap" hidden>
+              <div class="control-label-row">
+                <label for="crop-resize-scale">Crop Scale</label>
+                <output id="crop-resize-scale-out" for="crop-resize-scale">100%</output>
+              </div>
+              <input type="range" id="crop-resize-scale" min="10" max="200" value="100" step="5">
+            </div>
+
+            <div class="crop-custom-dims" id="crop-dims-wrap" hidden>
+              <label class="field-inline">
+                <span>Width (px)</span>
+                <input type="number" id="crop-target-width" class="number-input" min="16" max="8000" value="800">
+              </label>
+              <label class="field-inline">
+                <span>Height (px)</span>
+                <input type="number" id="crop-target-height" class="number-input" min="16" max="8000" value="600">
+              </label>
+              <label class="checkbox-row crop-lock-check" for="crop-lock-aspect">
+                <input type="checkbox" id="crop-lock-aspect" checked>
+                <span>Lock aspect</span>
+              </label>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <footer class="dialog-footer">
+        <button type="button" id="crop-reset-btn" class="btn btn-secondary">Reset to Original</button>
+        <div class="dialog-footer-right">
+          <form method="dialog">
+            <button type="submit" value="cancel" class="btn btn-ghost">Cancel</button>
+          </form>
+          <button type="button" id="crop-apply-btn" class="btn btn-primary" autofocus>Apply Crop</button>
+        </div>
+      </footer>
+    </div>
+  </dialog>
+</body>
+</html>
