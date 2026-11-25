@@ -962,6 +962,8 @@ dialog::backdrop {
 .dialog-shell {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
+  max-block-size: 90dvh;
+  min-block-size: 0;
 }
 
 .dialog-header {
@@ -985,6 +987,8 @@ dialog::backdrop {
   gap: 0.75rem;
   padding: 1rem 1.15rem;
   overflow: auto;
+  min-block-size: 0;
+  overscroll-behavior: contain;
 }
 
 .camera-target-label {
@@ -1183,20 +1187,46 @@ dialog.crop-dialog {
   }
 }
 
+.mobile-scroll-btn {
+  display: none;
+}
+
+.preview-canvas.is-scroll-mode {
+  touch-action: pan-y;
+  cursor: default;
+}
+
 /* Responsive breakpoint */
 @media (max-width: 900px) {
+  body {
+    display: block;
+  }
+
   .workspace {
-    grid-template-columns: 1fr;
+    display: block;
   }
 
   .controls-panel {
+    overflow: visible;
+    overscroll-behavior: auto;
+    scrollbar-gutter: auto;
     max-block-size: none;
     border-inline-end: 0;
     border-block-end: 1px solid var(--border);
   }
 
+  .canvas-stage {
+    overflow: visible;
+    min-block-size: 220px;
+    padding: 0.75rem;
+  }
+
   .preview-canvas {
-    max-block-size: 54dvh;
+    max-block-size: 46dvh;
+  }
+
+  .mobile-scroll-btn {
+    display: inline-flex;
   }
 }
 

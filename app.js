@@ -81,6 +81,7 @@
     exportFormat: 'image/png',
     exportQuality: 92,
     theme: 'auto',
+    canvasScrollMode: false,
   };
 
   const renderMeta = {
@@ -145,6 +146,7 @@
     copyBtn: document.getElementById('copy-btn'),
     printBtn: document.getElementById('print-btn'),
 
+    mobileScrollToggle: document.getElementById('mobile-scroll-toggle'),
     quickFrontBtn: document.getElementById('quick-front-btn'),
     quickBackBtn: document.getElementById('quick-back-btn'),
     canvasStage: document.getElementById('canvas-stage'),
@@ -1254,6 +1256,7 @@
     };
 
     el.previewCanvas.addEventListener('pointerdown', (e) => {
+      if (state.canvasScrollMode) return;
       const worldPt = toWorldPt(e);
       const hit = hitTestCanvas(worldPt);
 
@@ -2684,6 +2687,13 @@
     el.helperIdSizeBtn.addEventListener('click', fitToRealIdCardSize);
     el.helperSideBtn.addEventListener('click', () => quickArrange('horizontal'));
     el.helperStackBtn.addEventListener('click', () => quickArrange('vertical'));
+
+    el.mobileScrollToggle.addEventListener('click', () => {
+      state.canvasScrollMode = !state.canvasScrollMode;
+      el.previewCanvas.classList.toggle('is-scroll-mode', state.canvasScrollMode);
+      el.mobileScrollToggle.setAttribute('aria-pressed', String(state.canvasScrollMode));
+      el.mobileScrollToggle.textContent = state.canvasScrollMode ? '📜 Scroll Page' : '✋ Drag Images';
+    });
 
     el.quickFrontBtn.addEventListener('click', () => {
       if (state.selectedLayerId) moveLayerOrder(state.selectedLayerId, 1);
