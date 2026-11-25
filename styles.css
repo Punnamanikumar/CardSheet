@@ -1057,6 +1057,11 @@ dialog::backdrop {
 /* Crop & Resize Dialog */
 dialog.crop-dialog {
   inline-size: min(95dvw, 880px);
+  block-size: min(88dvh, 780px);
+}
+
+dialog.crop-dialog .dialog-shell {
+  block-size: 100%;
 }
 
 .crop-dialog-body {
@@ -1125,12 +1130,12 @@ dialog.crop-dialog {
 }
 
 .crop-stage {
-  display: grid;
-  place-items: center;
-  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 0;
   inline-size: 100%;
-  min-block-size: 200px;
-  max-block-size: 52dvh;
+  min-block-size: 160px;
   padding: 0.75rem;
   background: #020617;
   border-radius: var(--radius-sm);
@@ -1142,7 +1147,7 @@ dialog.crop-dialog {
   inline-size: auto;
   block-size: auto;
   max-inline-size: 100%;
-  max-block-size: calc(52dvh - 1.5rem);
+  max-block-size: 100%;
   touch-action: none;
   user-select: none;
 }

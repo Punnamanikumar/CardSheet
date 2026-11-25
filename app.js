@@ -1570,11 +1570,8 @@
 
     const stage = el.cropCanvas.parentElement;
     const stageRect = stage ? stage.getBoundingClientRect() : { width: 0, height: 0 };
-    const isCompactMobile = window.innerWidth <= 680;
     const maxPreviewW = stageRect.width > 80 ? Math.min(820, Math.floor(stageRect.width - 16)) : 800;
-    const maxPreviewH = isCompactMobile && stageRect.height > 80
-      ? Math.floor(stageRect.height - 16)
-      : Math.min(440, Math.round(window.innerHeight * 0.48));
+    const maxPreviewH = stageRect.height > 80 ? Math.floor(stageRect.height - 16) : 440;
     cropState.viewScale = Math.min(1, maxPreviewW / sw, maxPreviewH / sh);
     el.cropCanvas.width = Math.max(1, Math.round(sw * cropState.viewScale));
     el.cropCanvas.height = Math.max(1, Math.round(sh * cropState.viewScale));
