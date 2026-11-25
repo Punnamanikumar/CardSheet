@@ -176,6 +176,7 @@
     cropRotRightBtn: document.getElementById('crop-rot-right-btn'),
     cropSelectionDims: document.getElementById('crop-selection-dims'),
     cropResultDims: document.getElementById('crop-result-dims'),
+    cropResizeDetails: document.getElementById('crop-resize-details'),
     cropResizeMode: document.getElementById('crop-resize-mode'),
     cropScaleWrap: document.getElementById('crop-scale-wrap'),
     cropResizeScale: document.getElementById('crop-resize-scale'),
@@ -1567,8 +1568,13 @@
     sctx.drawImage(orig, -orig.naturalWidth / 2, -orig.naturalHeight / 2);
     sctx.restore();
 
-    const maxPreviewW = 800;
-    const maxPreviewH = 440;
+    const stage = el.cropCanvas.parentElement;
+    const stageRect = stage ? stage.getBoundingClientRect() : { width: 0, height: 0 };
+    const isCompactMobile = window.innerWidth <= 680;
+    const maxPreviewW = stageRect.width > 80 ? Math.min(820, Math.floor(stageRect.width - 16)) : 800;
+    const maxPreviewH = isCompactMobile && stageRect.height > 80
+      ? Math.floor(stageRect.height - 16)
+      : Math.min(440, Math.round(window.innerHeight * 0.48));
     cropState.viewScale = Math.min(1, maxPreviewW / sw, maxPreviewH / sh);
     el.cropCanvas.width = Math.max(1, Math.round(sw * cropState.viewScale));
     el.cropCanvas.height = Math.max(1, Math.round(sh * cropState.viewScale));
@@ -2020,6 +2026,8 @@
     cropState.lockAspect = true;
     cropState.activeDragPoint = null;
 
+    el.cropResizeDetails.open = window.innerWidth > 680;
+    el.cropDialog.showModal();
     buildCropSource();
 
     if (layer.cropRect && layer.cropRotation === cropState.rotation) {
@@ -2055,7 +2063,6 @@
     updateCropRatioButtons();
     syncCropResizeUI(true);
 
-    el.cropDialog.showModal();
     drawCropEditor();
   }
 

@@ -1127,8 +1127,9 @@ dialog.crop-dialog {
 .crop-stage {
   display: grid;
   place-items: center;
+  flex: 1 1 auto;
   inline-size: 100%;
-  min-block-size: 260px;
+  min-block-size: 200px;
   max-block-size: 52dvh;
   padding: 0.75rem;
   background: #020617;
@@ -1138,6 +1139,8 @@ dialog.crop-dialog {
 
 .crop-canvas {
   display: block;
+  inline-size: auto;
+  block-size: auto;
   max-inline-size: 100%;
   max-block-size: calc(52dvh - 1.5rem);
   touch-action: none;
@@ -1147,8 +1150,7 @@ dialog.crop-dialog {
 .crop-resize-panel {
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
-  padding: 0.75rem;
+  padding: 0.6rem 0.75rem;
   background: var(--surface-subtle);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -1159,7 +1161,26 @@ dialog.crop-dialog {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
+  gap: 0.45rem;
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+}
+
+.crop-metrics::-webkit-details-marker {
+  display: none;
+}
+
+.crop-metrics-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.crop-resize-toggle-hint {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text-muted);
 }
 
 .crop-resize-controls {
@@ -1167,6 +1188,7 @@ dialog.crop-dialog {
   grid-template-columns: minmax(170px, 220px) minmax(0, 1fr);
   align-items: end;
   gap: 0.75rem;
+  margin-block-start: 0.6rem;
 }
 
 .crop-custom-dims {
@@ -1181,6 +1203,77 @@ dialog.crop-dialog {
 }
 
 @media (max-width: 680px) {
+  dialog.crop-dialog {
+    inline-size: 100dvw;
+    max-inline-size: 100dvw;
+    block-size: 100dvh;
+    max-block-size: 100dvh;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+  }
+
+  dialog.crop-dialog .dialog-shell {
+    block-size: 100%;
+    max-block-size: 100dvh;
+  }
+
+  dialog.crop-dialog .dialog-header {
+    padding-inline: 0.85rem;
+    padding-block: 0.6rem;
+  }
+
+  dialog.crop-dialog .crop-dialog-body {
+    padding: 0.55rem 0.75rem;
+    gap: 0.45rem;
+  }
+
+  dialog.crop-dialog .dialog-footer {
+    padding-inline: 0.85rem;
+    padding-block: 0.6rem max(0.65rem, env(safe-area-inset-bottom));
+    gap: 0.4rem;
+  }
+
+  dialog.crop-dialog #crop-mode-hint {
+    display: none;
+  }
+
+  dialog.crop-dialog .crop-mode-switch {
+    min-inline-size: 100%;
+  }
+
+  dialog.crop-dialog .crop-toolbar {
+    gap: 0.4rem;
+  }
+
+  dialog.crop-dialog .crop-ratios {
+    flex-wrap: nowrap;
+    inline-size: 100%;
+    overflow-x: auto;
+    padding-block-end: 0.15rem;
+  }
+
+  dialog.crop-dialog .ratio-btn {
+    flex: none;
+  }
+
+  dialog.crop-dialog .crop-stage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1 1 0;
+    min-block-size: 140px;
+    max-block-size: none;
+    padding: 0.4rem;
+  }
+
+  dialog.crop-dialog .crop-canvas {
+    max-inline-size: 100%;
+    max-block-size: 100%;
+    inline-size: auto;
+    block-size: auto;
+  }
+
   .crop-resize-controls,
   .crop-custom-dims {
     grid-template-columns: 1fr;

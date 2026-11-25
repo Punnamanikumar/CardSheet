@@ -345,12 +345,16 @@
         </div>
 
         <section class="crop-resize-panel" aria-label="Resize cropped image">
-          <div class="crop-metrics">
-            <span class="dim-badge" id="crop-selection-dims">Selection: —</span>
-            <span class="status-pill" id="crop-result-dims">Result: —</span>
-          </div>
+          <details class="crop-resize-details" id="crop-resize-details" open>
+            <summary class="crop-metrics">
+              <span class="dim-badge" id="crop-selection-dims">Selection: —</span>
+              <span class="crop-metrics-right">
+                <span class="status-pill" id="crop-result-dims">Result: —</span>
+                <span class="crop-resize-toggle-hint">Resize ▾</span>
+              </span>
+            </summary>
 
-          <div class="crop-resize-controls">
+            <div class="crop-resize-controls">
             <label class="field-inline">
               <span>Resize Crop</span>
               <select id="crop-resize-mode" class="select-input">
@@ -382,7 +386,8 @@
                 <span>Lock aspect</span>
               </label>
             </div>
-          </div>
+            </div>
+          </details>
         </section>
       </div>
 
